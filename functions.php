@@ -102,19 +102,38 @@ function get_device_status() {
       . '<p><table class="thermo"><tr><th>Heat</th><th>Cool</th></tr>'
       . '<tr><td><input id="tempSet" name="tempSet"></td>'
       . '<td><input id="tempCool" name="tempCool"></td></tr></table></p>';
-      $html .= '<p><label for="mode">System Mode</label><br><select name="mode" id="mode" onChange="thermoSystemMode(\'' . $dev['deviceId'] . '\',this);">'
-      . '<option>Off</option>'
-      . '<option>Heat</option>'
-      . '<option>Cool</option>'
-      . '<option>Auto</option>'
-      . '</select></p>';
-      $html .= '<div id="fan">Fan Mode<br><input type="radio" name="fan" value="Auto" onClick="thermoFanMode(\'' . $dev['deviceId'] . '\',this);">Auto<br>'
-      . '<input type="radio" name="fan" value="On" onClick="thermoFanMode(\'' . $dev['deviceId'] . '\',this);">On</div>';
+      $tsmode = array('0' => 'Off','1' => 'Heat','2' => 'Cool');
+      $html .= '<p><label for="mode">System Mode</label><br><select name="mode" id="mode" onChange="thermoSystemMode(\'' . $dev['deviceId'] . '\',this);">';
+      foreach (array_keys($tsmode) as $mode) {
+        $selected = '';
+        if ($dev['thermostatSystemMode'] == $mode) $selected = ' selected';
+        $html .= '<option' . $selected . '>' . $tsmode[$mode] . '</option>';
+      }
+      $html .= '</select></p>';
+      if ($dev['thermostatFanState'] == '0') {
+        $auto = ' checked';
+        $on = '';
+      } else {
+        $auto = '';
+        $on = ' checked';
+      }
+      $html .= '<div id="fan">Fan Mode<br><input type="radio" name="fan" value="Auto" onClick="thermoFanMode(\'' 
+      . $dev['deviceId'] . '\',this);"' . $auto . '>Auto<br>'
+      . '<input type="radio" name="fan" value="On" onClick="thermoFanMode(\'' 
+      . $dev['deviceId'] . '\',this);"' . $on . '>On</div>';
 //      $resp = put_command('thermoFanState',array('nodeId' => $dev['nodeId']));
 //      global $host,$port,$pass;
 //      $url="http://".$host.":".$port."/zwave/get_thermostatFanMode?nodeId=" . $dev['deviceId'] . "&password=".$pass;
 //      $resp=file_get_contents($url);
 //      $html .= '<p>-' . $resp . '</p>';
+    break;
+
+    case '6':
+      $html .= '<p>'
+      . 'Type: ' . $type_name[$dev['deviceType']]
+      . '<br>Node Id: ' . $dev['nodeId']
+      . '<br>Level: ' . $dev['level']
+      . '</p>';
     break;
 
     case '11':
@@ -195,21 +214,30 @@ function device_info($dev) {
     break;
 
     case '3':
-      $cur_temp = '';
-      if ($dev['sr'] != null) {
-        foreach ($dev['sr'] as $att) {
-          if (strpos($att['name'],'Temperature') === 0) $cur_temp = $att['value'] . $att['label'];
-        }
-      }
+      $img = 'thermostat.png';
+      $fm = array('0' => 'Auto','1' => 'On');
+      $tsmode = array('0' => 'Off','1' => 'Heat','2' => 'Cool');
       $data['icon'] = '<div class="status" id="' . $dev['nodeId'] . '">'
-      . '<div class="textIcon">' . $cur_temp . '</div></div>'
-      . '<div class="deviceText">' . $dev['deviceName'] . '</div>';
+      . '<img src="images/' . $img . '"></div>'
+      . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
+      . '<div class="deviceInfo">' . $dev['currentThermTemp'] . '&deg; - ' . $fm[$dev['thermostatFanState']] 
+      . ' - ' . $tsmode[$dev['thermostatSystemMode']] . ' (' . $tsmode[$dev['thermostatSystemState']] . ')' . '</div>';
     break;
 
     case '4':
       $img = 'controller.png';
       $data['icon'] = '<div class="status" id="' . $dev['nodeId']
       . '"><img src="images/' . $img . '"></div>'
+      . '<div class="deviceText">' . $dev['deviceName'] . '</div>';
+    break;
+
+    case '6':
+      if ($dev['level'] == 0) {
+        $img = 'binaryOff.png';
+      } else {
+        $img = 'binaryOn.png';
+      }
+      $data['icon'] = '<div class="status"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>';
     break;
 
