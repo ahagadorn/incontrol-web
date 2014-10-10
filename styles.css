@@ -1,0 +1,107 @@
+#content { display: flex;
+  min-height: 400px;
+  width:900px;
+}
+
+.device {
+  height: 60px;
+  width: 220px;
+  border: 1px solid blue; 
+  border-radius: 6px;
+  margin: 5px 0px 5px 5px;
+  float: left;
+  background-color:white;
+}
+
+.deviceText {
+  width: 160px;
+  margin: 7px 0px 0px 5px;
+  font-size: 1em;
+  color: blue;
+  float: left;
+  white-space: nowrap;
+}
+
+.status {
+  float:left;
+  height: 50px;
+  width: 50px;
+  margin: 5px 0px 0px 0px;
+}
+
+.textIcon {
+  width: 40px;
+  height: 40px;
+  margin: 5px;
+  text-align: center;
+  color: red;
+  background-color: #cccccc;
+  border-radius: 6px;
+  font-size: 1.1em;
+  line-height: 40px;
+}
+
+.levelText {
+  font-size: .8em;
+  color: blue;
+  line-height:30px;
+  margin: 0 0 0 15px;
+}  
+
+#devices {
+  float:left;
+  width:695px;
+  border-radius:6px;
+  background-color:#dddddd;
+}
+
+#deviceStatus {
+  float:left;
+  width:200px;
+  border-radius:6px;
+  background-color:#dddddd;
+  margin: 0 5px 0 5px;
+}
+
+#deviceStatus h1 {
+  font-size:.9em;
+  font-weight:bold;
+  margin: 10px;
+  text-decoration:underline;
+  color: blue;
+}
+
+#deviceStatus ul {
+  list-style-type: none;
+  font-size:.8em;
+  margin: 5px;
+}
+
+#deviceStatus select {
+  width:170px;
+  margin:10px;
+}
+
+#deviceStatus p {
+  margin:10px;
+}
+
+#fan {
+  margin:10px;
+}
+
+#tempSet, #tempCool {
+  width: 20px;
+  font-size:.7em;
+}
+
+.thermo th {
+  font-size:.8em;
+  font-weight: normal;
+  text-align:left;
+  width:120px;
+}
+
+#mode {
+  margin: 0;
+}
