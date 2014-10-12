@@ -33,18 +33,35 @@ function get_devices() {
   }
   $devices = json_decode($json, true);
 
+  $url="http://".$host.":".$port."/zwave/rooms?password=".$pass;
+  $json=file_get_contents($url);
+  if ($json === false) {
+    return false;
+  }
+  $roomdata = json_decode($json, true);
+  $rooms = array('No Room' => null);
+  foreach ($roomdata as $room) {
+    $rooms[$room['roomName']] = $room['roomId'];
+  } 
+
   $html = '';
-  foreach($devices as $device) {
-    $_SESSION[$device['deviceId']] = $device;
-    $dev = device_info($device);
-    if ($dev['visible'] == 'false') continue;
-    $background = '#ffffff'; 
-    if ($cur_dev == $device['deviceId']) {
-      $background = '#ccffff';
+  foreach (array_keys($rooms) as $room) {
+    $html .= '<div style="clear:both;"></div><div class="room"><h2>' . $room . '</h2>';
+    foreach($devices as $device) {
+      $_SESSION[$device['deviceId']] = $device;
+      $dev = device_info($device);
+      if ($dev['visible'] == 'false') continue;
+      if($device['roomId'] == $rooms[$room]) {
+        $background = '#ffffff'; 
+        if ($cur_dev == $device['deviceId']) {
+          $background = '#ccffff';
+        }
+        $html .= '<div class="device" id="' . $device['deviceId'] . '" style="background-color:' . $background . ';" onClick = "devSelect(this)">' 
+        . $dev['icon']
+        . '</div>';
+      }
     }
-    $html .= '<div class="device" id="' . $device['deviceId'] . '" style="background-color:' . $background . ';" onClick = "devSelect(this)">' 
-    . $dev['icon']
-    . '</div>';
+    $html .= '</div>';
   }
   $data = json_encode(array('success',$html));
 
@@ -174,12 +191,15 @@ function device_info($dev) {
     case '0':
       if ($dev['level'] == 0) {
         $img = 'switchOff.png';
+        $stat = '<span style="color:blue;">Off</span>';
       } else {
         $img = 'switchOn.png';
+        $stat = '<span style="color:#33cc00;">On</span>';
       }
       $data['icon'] = '<div class="status"'
       . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
-      . '<div class="deviceText">' . $dev['deviceName'] . '</div>';
+      . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
+      . '<div class="deviceInfo">' . $stat . '</div>';
     break;
 
     case '1':
@@ -205,12 +225,15 @@ function device_info($dev) {
     case '2':
       if ($dev['level'] == 0) {
         $img = 'outletOff.png';
+        $stat = '<span style="color:blue;">Off</span>';
       } else {
         $img = 'outletOn.png';
+        $stat = '<span style="color:#33cc00;">On</span>';
       }   
       $data['icon'] = '<div class="status" id="' . $dev['nodeId']
       . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
-      . '<div class="deviceText">' . $dev['deviceName'] . '</div>';
+      . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
+      . '<div class="deviceInfo">' . $stat . '</div>';
     break;
 
     case '3':
