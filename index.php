@@ -9,8 +9,8 @@ if (isset($_REQUEST['action'])) {
 
 switch ($action)
 {
-  case 'home':
-    home();
+  case 'devices':
+    devices();
     break;
 
   case 'get_devices':
@@ -37,8 +37,20 @@ switch ($action)
     set_thermo_fan_mode();
     break;
 
+  case 'scenes':
+    scenes();
+    break;
+
+  case 'get_scene':
+    get_scene();
+    break;
+
+  case 'activate_scene':
+    activate_scene();
+    break;
+
   default:
-    home();
+    devices();
     break;
 }
 

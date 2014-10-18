@@ -8,9 +8,11 @@ This project is intended to eventually be a functional clone of the inControl HA
 INSTALLATION
 
   1. Install and configure PHP and a suitable web server such as apache
-  2. Unzip incontrol-web-<version>.zip in the web server HTML directory
+  2. Unzip incontrol-web.zip in the web server HTML directory
   3. Make sure the web server user can write to the directory (necessary for the log file)
-  4. Edit config.php to point to your inControl HA server and enter your password
+  4. Copy or rename config.php.sample to config.php and edit config.php to point to 
+     your inControl HA server and enter your password. If you are upgrading, skip the
+     copy/rename and just retain your config.php, everything else can be ovwrwritten.
   5. Browse to your web server URL, you should see all your devices.
 
 USAGE

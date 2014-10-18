@@ -1,25 +1,41 @@
 <?php
 
 session_start();
-function home() {
+
+function display_page($header='',$content='') {
 ?>
 <html>
 <head>
-<title>inControl</title>
+<title>InControl Web</title>
 <link href="styles.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="js/jquery.js"></script>
-<script type="text/javascript" src="js/ic.js"></script>
 <link rel="stylesheet" href="js/jquery-ui/jquery-ui.css">
 <script src="js/jquery-ui/jquery-ui.js"></script>
+<?php print $header; ?>
 </head>
 <body>
+<div id="main">
+<div id="logo"><img source="images/InControl.png"></div>
+<div id="menu">
+<ul>
+<li><a href="index.php?action=devices">Devices</a></li>
+<li><a href="index.php?action=scenes">Scenes</a></li>
+</ul>
+</div>
 <div id="content">
-<div id="devices"></div>
-<div id="deviceStatus"></div>
+<?php print $content; ?>
+</div>
 </div>
 </body>
 </html>
 <?php
+}
+
+function devices() {
+  $header = '<script type="text/javascript" src="js/devices.js"></script>';
+  $content = '<div id="devices"></div>'
+           . '<div id="deviceStatus"></div>';
+  display_page($header,$content);
 }
 
 function get_devices() {
@@ -171,11 +187,11 @@ function get_device_status() {
 
   if ($dev['sr'] != null) {
     $size = sizeof($dev['sr']);
-    $html .= '<select name="attribute" size="' . $size . '">';
+    $html .= '<p><select name="attribute" id="sr" size="' . $size . '">';
     foreach ($dev['sr'] as $att) {
       $html .= "<option>" . $att['name'] . ": " . $att['value'] . $att['label'] . "</option>";
     }
-    $html .= "</select>";
+    $html .= "</select></p>";
   }
 
   $data = json_encode(array('success',$html,$type));
@@ -257,11 +273,14 @@ function device_info($dev) {
     case '6':
       if ($dev['level'] == 0) {
         $img = 'binaryOff.png';
+        $stat = '<span style="color:blue;">Closed</span>';
       } else {
         $img = 'binaryOn.png';
+        $stat = '<span style="color:#ff0000;">Open</span>';
       }
       $data['icon'] = '<div class="status"><img src="images/' . $img . '"></div>'
-      . '<div class="deviceText">' . $dev['deviceName'] . '</div>';
+      . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
+      . '<div class="deviceInfo">' . $stat . '</div>';
     break;
 
     case '9':
@@ -355,22 +374,110 @@ function set_device_state() {
   print $data;
 }
 
-function put_command($command,$data) {
+function get_scenes() {
+  global $scene_data;
+  $json = put_command('getScenes',array(),true);
+  if ($json) {
+    $s = json_decode($json, true);
+    foreach ($s as $scene) {
+      $scenes[$scene['sceneId']] = $scene;
+    }
+    return $scenes;
+  }
+  return false;
+}
+
+function scenes() {
+  $header = '<script type="text/javascript" src="js/scenes.js"></script>';
+  $content = '<div id="scenes">';
+
+  $scenes = get_scenes();
+  if ($scenes) {
+    foreach (array_keys($scenes) as $scene) {
+      $content .= '<div class="scene" id="' . $scene 
+      . '" onClick="sceneSelect(this)">'
+      . '<div class="sceneButton"><button onClick="activateScene(\'' . $scenes[$scene]['sceneName'] 
+      . '\')">Activate</button></div>' 
+      . '<div class="deviceText">' . $scenes[$scene]['sceneName'] . '</div>'
+      . '</div>';
+    }
+  }
+  $content .=  '</div><div id="sceneStatus"></div>';
+
+  display_page($header,$content);
+}
+
+function get_scene() {
+  global $host,$port,$pass;
+  $scenes = get_scenes();
+  $scene_id = $_POST['sceneId'];
+  mwlog(print_r($scenes[$scene_id],true));
+  $html = '<h1>' . $scenes[$scene_id]['sceneName'] . '</h1>';
+  $json = put_command('getSceneDevices',array('sceneId' => $scene_id),true);
+  if ($json) {
+    // Get all the devices
+    $url="http://".$host.":".$port."/zwave/devices?password=".$pass;
+    $json2=file_get_contents($url);
+    if ($json2) {
+      $d = json_decode($json2, true);
+      foreach ($d as $dev) {
+        $devices[$dev['deviceId']] = $dev;
+      }
+    }
+
+    // Loop through all the scene devices
+    $html .= '<ul>';
+    $d = json_decode($json, true);
+    //mwlog(print_r($d,true));
+    foreach ($d as $dev) {
+      $dd = $devices[$dev['deviceId']];
+      $html .= '<li>' . $dd['deviceName'] . '&nbsp;' . $dev['actions'][0]['endValue'] . '</li>';
+    }
+    $html .= '</ul>';
+  }
+  $data = json_encode(array('success',$html));
+
+  print $data;
+}
+
+function activate_scene() {
+  $scene_name = $_REQUEST['sceneName'];
+  mwlog('Activate: ' . $scene_id);
+  $resp = put_command('activateScene',array('sceneName' => $scene_name),true);
+
+  $data = json_encode(array('success',$resp));
+  print $data;
+}
+
+function put_command($command,$data=array(),$json=false) {
   global $host,$port,$pass;
 
   $data['password'] = $pass;
+  $ch = curl_init();
 
-  $fields = http_build_query($data);
-  $url="http://" . $host . ":" . $port . "/zwave/" . $command . '?' . $fields;
+  if ($json) {
+    // json encoded params
+    $fields = json_encode($data);
+    $f = http_build_query($data);
+    $url="http://" . $host . ":" . $port . "/zwave/" . $command;
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+    curl_setopt($ch, CURLOPT_POSTFIELDS,$fields);
+    $cl =  strlen($fields);
+  } else {
+    // query string params
+    $fields = http_build_query($data);
+    $url="http://" . $host . ":" . $port . "/zwave/" . $command . '?' . $fields;
+    curl_setopt($ch, CURLOPT_URL, $url); 
+    curl_setopt($ch, CURLOPT_PUT, true);
+    $cl = 0;
+  }
 
-  $ch = curl_init($url);
- 
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_PUT, true);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Length: ' . strlen($fields))); 
-//  curl_setopt($ch, CURLOPT_POSTFIELDS, $fields;
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json','Content-Length: ' . $cl)); 
 
   $response = curl_exec($ch);
+  curl_close($ch);
   if(!$response) {
     return false;
   }
