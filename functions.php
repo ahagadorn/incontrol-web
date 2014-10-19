@@ -214,7 +214,7 @@ function device_info($dev) {
         $stat = '<span style="color:#33cc00;">On</span>';
       }
       $data['icon'] = '<div class="status"'
-      . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
+      . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',99,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div class="deviceInfo">' . $stat . '</div>';
     break;
@@ -248,7 +248,7 @@ function device_info($dev) {
         $stat = '<span style="color:#33cc00;">On</span>';
       }   
       $data['icon'] = '<div class="status" id="' . $dev['nodeId']
-      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
+      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',99,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div class="deviceInfo">' . $stat . '</div>';
     break;
