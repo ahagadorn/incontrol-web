@@ -40,7 +40,8 @@ function devices() {
 
 function get_devices() {
   global $host,$port,$pass;
-  $cur_dev = $_POST['curDev'];
+  $cur_dev = '';
+  if (isset($_POST['curDev'])) $cur_dev = $_POST['curDev'];
   $devices = array();
   $url="http://".$host.":".$port."/zwave/devices?password=".$pass;
   $json=file_get_contents($url);
@@ -66,7 +67,7 @@ function get_devices() {
     foreach($devices as $device) {
       $_SESSION[$device['deviceId']] = $device;
       $dev = device_info($device);
-      if ($dev['visible'] == 'false') continue;
+      if (isset($dev['visible']) && $dev['visible'] == 'false') continue;
       if($device['roomId'] == $rooms[$room]) {
         $background = '#ffffff'; 
         if ($cur_dev == $device['deviceId']) {
