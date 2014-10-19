@@ -2,6 +2,8 @@
 require('config.php');
 require('functions.php');
 
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
 $action = '';
 if (isset($_REQUEST['action'])) {
   $action = $_REQUEST['action'];
