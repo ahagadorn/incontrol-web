@@ -214,7 +214,7 @@ function device_info($dev) {
         $stat = '<span style="color:#33cc00;">On</span>';
       }
       $data['icon'] = '<div class="status"'
-      . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',99,255)"><img src="images/' . $img . '"></div>'
+      . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div class="deviceInfo">' . $stat . '</div>';
     break;
@@ -226,7 +226,7 @@ function device_info($dev) {
         $img = 'lightOn.png';
       }
       $data['icon'] = '<div class="status" id="' . $dev['nodeId'] 
-      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',99,255)"><img src="images/' . $img . '"></div>'
+      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div id="dim_' . $dev['nodeId'] . '" style="width:120px;font-size:10px;float:left;margin:10px 0 0 10px;"></div>'
       . '<span class="levelText" id="level_' . $dev['nodeId'] . '">' . $dev['level'] . '</span>'
@@ -489,7 +489,7 @@ function put_command($command,$data=array(),$json=false) {
 
 function mwlog($message) {
   $logFile = "api_error.log";
-  $fh = fopen($logFile, 'a') or die("can't open file");
+  $fh = fopen($logFile, 'a') or die("Can not open log file. Make sure that api_error.log and your web directory are writable by the web server user.");
   fwrite($fh,date('c') . ' ' . $message . "\n");
   fclose($fh);
 }
