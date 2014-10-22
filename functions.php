@@ -89,8 +89,11 @@ function get_device_status() {
   global $type_name;
   $id = $_REQUEST['id'];
   $dev = $_SESSION[$id];
+//  if ($dev['nodeId'] == 0) $dev['nodeId'] = $dev['providerDeviceId'];
   $html .= '<h1>' . $dev['deviceName'] . '</h1>';
   $type = $dev['deviceType'];
+  $date = preg_replace('/\/Date\((.*)-.*\)\//','$1',$dev['lastLevelUpdate']);
+  $last_update = date('M j, Y g:iA ',$date/1000);
   switch ($type) {
 
     case '0':
@@ -98,6 +101,7 @@ function get_device_status() {
       . 'Type: ' . $type_name[$dev['deviceType']]
       . '<br>Node Id: ' . $dev['nodeId']
       . '<br>Level: ' . $dev['level']
+      . '<br>Last Change: ' . $last_update
       . '</p>';
     break;
 
@@ -106,14 +110,26 @@ function get_device_status() {
       . 'Type: ' . $type_name[$dev['deviceType']]
       . '<br>Node Id: ' . $dev['nodeId']
       . '<br>Level: ' . $dev['level']
+      . '<br>Last Change: ' . $last_update
       . '</p>';
     break;
+
+    case '2':
+      $html .= '<p>'
+      . 'Type: ' . $type_name[$dev['deviceType']]
+      . '<br>Node Id: ' . $dev['nodeId']
+      . '<br>Level: ' . $dev['level']
+      . '<br>Last Change: ' . $last_update
+      . '</p>';
+    break;
+
 
     case '3':
       $html .= '<p>'
       . 'Type: ' . $type_name[$dev['deviceType']]
       . '<br>Node Id: ' . $dev['nodeId']
       . '<br>Level: ' . $dev['level']
+      . '<br>Last Change: ' . $last_update
       . '</p>';
 
       $data = array();
@@ -167,6 +183,7 @@ function get_device_status() {
       . 'Type: ' . $type_name[$dev['deviceType']]
       . '<br>Node Id: ' . $dev['nodeId']
       . '<br>Level: ' . $dev['level']
+      . '<br>Last Change: ' . $last_update
       . '</p>';
     break;
 
@@ -175,6 +192,7 @@ function get_device_status() {
       . 'Type: ' . $type_name[$dev['deviceType']]
       . '<br>Node Id: ' . $dev['nodeId']
       . '<br>Level: ' . $dev['level']
+      . '<br>Last Change: ' . $last_update
       . '</p>';
     break;
 
@@ -203,6 +221,7 @@ function get_device_status() {
 function device_info($dev) {
   $data = array();
 
+//  if ($dev['nodeId'] == 0) $dev['deviceId'] = $dev['providerDeviceId'];
   $type = $dev['deviceType'];
   switch ($type) {
     case '0':
@@ -350,6 +369,9 @@ function set_device_state() {
   $max_level = $_REQUEST['max_level'];
   $dim_level = $_REQUEST['dim_level'];
 
+  $dev = $_SESSION[$id];
+  if ($dev['nodeId'] == 0) $id = $dev['providerDeviceId']; 
+
   if ($dim_level == '255') {
     if ($cur_level == '0') {
       $level = $max_level;
@@ -368,7 +390,8 @@ function set_device_state() {
     }  
   } 
 
-  $url="http://".$host.":".$port."/zwave/setDeviceState?nodeId=".$id."&powered=" . $powered . "&level=".$level."&password=".$pass;
+  $url="http://".$host.":".$port . "/zwave/setDeviceState?nodeId=". urlencode($id) . "&powered=" . $powered 
+  . "&level=".$level."&password=".$pass;
   $resp=file_get_contents($url);
   $data = json_encode(array('success',$powered));
 
@@ -376,7 +399,6 @@ function set_device_state() {
 }
 
 function get_scenes() {
-  global $scene_data;
   $json = put_command('getScenes',array(),true);
   if ($json) {
     $s = json_decode($json, true);
@@ -485,6 +507,26 @@ function put_command($command,$data=array(),$json=false) {
 
   mwlog($response);
   return $response;
+}
+
+function check_modules() {
+  if (! in_array('curl', get_loaded_extensions())) {
+?>
+<html>
+<head>
+<title>InControl Web - Error</title>
+</head>
+<body>
+<p>PHP CURL Module is missing</p>
+<p>For Debian distributions (Ubuntu) try <b>apt-get install php5_curl</b></p>
+<p>For Red Hat distributions try <b>yum install php_curl</b></p>
+<p>For others, check documentation for the particular distribution.</p>
+</body>
+</html>
+<?php>
+    exit;
+  }
+  return true;
 }
 
 function mwlog($message) {

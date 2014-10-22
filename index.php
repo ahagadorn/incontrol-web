@@ -4,6 +4,8 @@ require('functions.php');
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
+check_modules();
+
 $action = '';
 if (isset($_REQUEST['action'])) {
   $action = $_REQUEST['action'];
