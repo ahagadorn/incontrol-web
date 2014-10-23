@@ -233,7 +233,7 @@ function device_info($dev) {
         $stat = '<span style="color:#33cc00;">On</span>';
       }
       $data['icon'] = '<div class="status"'
-      . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
+      . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',false,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div class="deviceInfo">' . $stat . '</div>';
     break;
@@ -245,7 +245,7 @@ function device_info($dev) {
         $img = 'lightOn.png';
       }
       $data['icon'] = '<div class="status" id="' . $dev['nodeId'] 
-      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',255,255)"><img src="images/' . $img . '"></div>'
+      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',false,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div id="dim_' . $dev['nodeId'] . '" style="width:120px;font-size:10px;float:left;margin:10px 0 0 10px;"></div>'
       . '<span class="levelText" id="level_' . $dev['nodeId'] . '">' . $dev['level'] . '</span>'
@@ -254,7 +254,7 @@ function device_info($dev) {
       . '$("#dim_' . $dev['nodeId'] . '").slider({ max: 99 });'
       . '$("#dim_' . $dev['nodeId'] . '").slider("value",' . $dev['level'] . ');'
       . '$("#dim_' . $dev['nodeId'] . '").slider({ change: function( event, ui ) {'
-      . 'toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',99,ui.value) } });'
+      . 'toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',true,ui.value) } });'
       . '</script>';
     break;
 
@@ -267,7 +267,7 @@ function device_info($dev) {
         $stat = '<span style="color:#33cc00;">On</span>';
       }   
       $data['icon'] = '<div class="status" id="' . $dev['nodeId']
-      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',99,255)"><img src="images/' . $img . '"></div>'
+      . '" onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',false,255)"><img src="images/' . $img . '"></div>'
       . '<div class="deviceText">' . $dev['deviceName'] . '</div>'
       . '<div class="deviceInfo">' . $stat . '</div>';
     break;
@@ -366,32 +366,24 @@ function set_device_state() {
 
   $id = $_REQUEST['id'];
   $cur_level = $_REQUEST['cur_level'];
-  $max_level = $_REQUEST['max_level'];
+  $is_dimmer = $_REQUEST['is_dimmer'];
   $dim_level = $_REQUEST['dim_level'];
 
   $dev = $_SESSION[$id];
 
-  if ($dim_level == '255') {
-    if ($cur_level == '0') {
-      $level = $max_level;
-      $powered = 'True';
-    } else {
-      $level = 0;
-      $powered = 'False';
-    }
+  if ($is_dimmer == 'true') {
+    $url="http://" . $host . ":" . $port . "/zwave/setDeviceState?nodeId=". urlencode($id) . "&powered=true"
+    . "&level=" . $dim_level . "&password=" . $pass;
+    $resp=file_get_contents($url);
   } else {
-    if ($dim_level == '0') {
-      $level = 0;
-      $powered = 'False';
+    if ($cur_level == '0') {
+      $powered = 'true';
     } else {
-      $level = $dim_level;
-      $powered = 'True';
-    }  
-  } 
+      $powered = 'false';
+    }
+    $json = put_command('setDevicePower',array('deviceId' => $id,'powered' => $powered),true);
+  }
 
-  $url="http://".$host.":".$port . "/zwave/setDeviceState?nodeId=". urlencode($id) . "&powered=" . $powered 
-  . "&level=".$level."&password=".$pass;
-  $resp=file_get_contents($url);
   $data = json_encode(array('success',$powered));
 
   print $data;

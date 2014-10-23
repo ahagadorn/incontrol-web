@@ -36,9 +36,9 @@ function getDeviceStatus(devId) {
   return;
 }
 
-function toggleDev(id,curLevel,maxLevel,dimLevel) {
+function toggleDev(id,curLevel,isDimmer,dimLevel) {
   $('#devices').css('cursor','wait');
-  $.post("index.php", { action: "set_device_state",id: id, cur_level: curLevel,max_level: maxLevel,dim_level: dimLevel },
+  $.post("index.php", { action: "set_device_state",id: id, cur_level: curLevel,is_dimmer: isDimmer,dim_level: dimLevel },
     function(data) {
       var stat = eval(data);
       if (stat[0] == 'success') {
