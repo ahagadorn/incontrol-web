@@ -370,7 +370,6 @@ function set_device_state() {
   $dim_level = $_REQUEST['dim_level'];
 
   $dev = $_SESSION[$id];
-  if ($dev['nodeId'] == 0) $id = $dev['providerDeviceId']; 
 
   if ($dim_level == '255') {
     if ($cur_level == '0') {
