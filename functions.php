@@ -39,18 +39,20 @@ function devices() {
 }
 
 function get_devices() {
-  global $host,$port,$pass;
+  global $config;
   $cur_dev = '';
   if (isset($_POST['curDev'])) $cur_dev = $_POST['curDev'];
   $devices = array();
-  $url="http://".$host.":".$port."/zwave/devices?password=".$pass;
+  $url="http://" . $config['incontrol']['host'] . ":" . $config['incontrol']['port'] 
+  . "/zwave/devices?password=" . $config['incontrol']['pass'];
   $json=file_get_contents($url);
   if ($json === false) {
     return false;
   }
   $devices = json_decode($json, true);
 
-  $url="http://".$host.":".$port."/zwave/rooms?password=".$pass;
+  $url="http://".$config['incontrol']['host'] . ":" . $config['incontrol']['port']
+  . "/zwave/rooms?password=" . $config['incontrol']['pass'];
   $json=file_get_contents($url);
   if ($json === false) {
     return false;
@@ -172,8 +174,8 @@ function get_device_status() {
       . '<input type="radio" name="fan" value="On" onClick="thermoFanMode(\'' 
       . $dev['deviceId'] . '\',this);"' . $on . '>On</div>';
 //      $resp = put_command('thermoFanState',array('nodeId' => $dev['nodeId']));
-//      global $host,$port,$pass;
-//      $url="http://".$host.":".$port."/zwave/get_thermostatFanMode?nodeId=" . $dev['deviceId'] . "&password=".$pass;
+//      global $config['incontrol']['host'],$config['incontrol']['port'],$config['incontrol']['pass'];
+//      $url="http://".$config['incontrol']['host'].":".$config['incontrol']['port']."/zwave/get_thermostatFanMode?nodeId=" . $dev['deviceId'] . "&password=".$config['incontrol']['pass'];
 //      $resp=file_get_contents($url);
 //      $html .= '<p>-' . $resp . '</p>';
     break;
@@ -362,7 +364,7 @@ function set_thermo_fan_mode() {
 }
 
 function set_device_state() {
-  global $host,$port,$pass;
+  global $config;
 
   $id = $_REQUEST['id'];
   $cur_level = $_REQUEST['cur_level'];
@@ -372,8 +374,8 @@ function set_device_state() {
   $dev = $_SESSION[$id];
 
   if ($is_dimmer == 'true') {
-    $url="http://" . $host . ":" . $port . "/zwave/setDeviceState?nodeId=". urlencode($id) . "&powered=true"
-    . "&level=" . $dim_level . "&password=" . $pass;
+    $url="http://" . $config['incontrol']['host'] . ":" . $config['incontrol']['port'] . "/zwave/setDeviceState?nodeId=". urlencode($id) . "&powered=true"
+    . "&level=" . $dim_level . "&password=" . $config['incontrol']['pass'];
     $resp=file_get_contents($url);
   } else {
     if ($cur_level == '0') {
@@ -422,7 +424,7 @@ function scenes() {
 }
 
 function get_scene() {
-  global $host,$port,$pass;
+  global $config;
   $scenes = get_scenes();
   $scene_id = $_POST['sceneId'];
   mwlog(print_r($scenes[$scene_id],true));
@@ -430,7 +432,8 @@ function get_scene() {
   $json = put_command('getSceneDevices',array('sceneId' => $scene_id),true);
   if ($json) {
     // Get all the devices
-    $url="http://".$host.":".$port."/zwave/devices?password=".$pass;
+    $url="http://" . $config['incontrol']['host'] . ":" . $config['incontrol']['port'] 
+    . "/zwave/devices?password=" . $config['incontrol']['pass'];
     $json2=file_get_contents($url);
     if ($json2) {
       $d = json_decode($json2, true);
@@ -464,16 +467,16 @@ function activate_scene() {
 }
 
 function put_command($command,$data=array(),$json=false) {
-  global $host,$port,$pass;
+  global $config;
 
-  $data['password'] = $pass;
+  $data['password'] = $config['incontrol']['pass'];
   $ch = curl_init();
 
   if ($json) {
     // json encoded params
     $fields = json_encode($data);
     $f = http_build_query($data);
-    $url="http://" . $host . ":" . $port . "/zwave/" . $command;
+    $url="http://" . $config['incontrol']['host'] . ":" . $config['incontrol']['port'] . "/zwave/" . $command;
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
     curl_setopt($ch, CURLOPT_POSTFIELDS,$fields);
@@ -481,7 +484,7 @@ function put_command($command,$data=array(),$json=false) {
   } else {
     // query string params
     $fields = http_build_query($data);
-    $url="http://" . $host . ":" . $port . "/zwave/" . $command . '?' . $fields;
+    $url="http://" . $config['incontrol']['host'] . ":" . $config['incontrol']['port'] . "/zwave/" . $command . '?' . $fields;
     curl_setopt($ch, CURLOPT_URL, $url); 
     curl_setopt($ch, CURLOPT_PUT, true);
     $cl = 0;

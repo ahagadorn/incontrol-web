@@ -1,10 +1,24 @@
 <?php
-require('config.php');
+//require('config.php');
 require('functions.php');
 
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 check_modules();
+$config = parse_ini_file('config.ini',true);
+if (! $config) {
+?>
+<html>
+<head>
+<title>InControl Web - Error</title>
+<h2>Error</h2>
+<p>The configuration fine config.ini is missing or not readable.</p><p>If this is a new installation,
+ or an upgrade from a previous version, please copy or rename config.ini.sample to config.ini
+ and enter the appropriate values.</p><p>If this is an upgrade, you may delete config.php and config.php.sample
+ they are no longer used.</p>
+<?php
+exit;
+}
 
 $action = '';
 if (isset($_REQUEST['action'])) {
