@@ -523,7 +523,7 @@ function check_modules() {
 <p>For others, check documentation for the particular distribution.</p>
 </body>
 </html>
-<?php>
+<?php
     exit;
   }
   return true;
