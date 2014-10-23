@@ -11,11 +11,14 @@ if (! $config) {
 <html>
 <head>
 <title>InControl Web - Error</title>
+<body>
 <h2>Error</h2>
 <p>The configuration fine config.ini is missing or not readable.</p><p>If this is a new installation,
  or an upgrade from a previous version, please copy or rename config.ini.sample to config.ini
  and enter the appropriate values.</p><p>If this is an upgrade, you may delete config.php and config.php.sample
  they are no longer used.</p>
+</body>
+</html>
 <?php
 exit;
 }
