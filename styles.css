@@ -141,6 +141,26 @@ body {
   font-size:.8em;
 }
 
+.switchStatusOn {
+  color:blue;
+  background-color:#ffcc00;
+  border-radius:3px;
+  height:20px;
+  width:30px;
+  text-align:center;
+  line-height:20px;
+}
+
+.switchStatusOff {
+  color:blue;
+  background-color:#cccccc;
+  border-radius:3px;
+  height:20px;
+  width:30px;
+  text-align:center;
+  line-height:20px;
+}
+
 #fan {
   margin:10px;
   font-size:.8em;

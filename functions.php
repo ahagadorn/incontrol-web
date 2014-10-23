@@ -227,10 +227,10 @@ function device_info($dev) {
     case '0':
       if ($dev['level'] == 0) {
         $img = 'switchOff.png';
-        $stat = '<span style="color:blue;">Off</span>';
+        $stat = '<div class="switchStatusOff">Off</div>';
       } else {
         $img = 'switchOn.png';
-        $stat = '<span style="color:#33cc00;">On</span>';
+        $stat = '<div class="switchStatusOn">On</div>';
       }
       $data['icon'] = '<div class="status"'
       . ' onClick="toggleDev(\'' . $dev['deviceId'] . '\',' . $dev['level'] . ',false,255)"><img src="images/' . $img . '"></div>'
