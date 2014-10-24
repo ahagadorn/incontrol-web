@@ -3,3 +3,6 @@ host = localhost;
 port = 1178;
 pass = mypass;
 
+[devices]
+default_room = 'All';
+refresh = 10;
